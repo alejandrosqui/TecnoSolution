@@ -1,9 +1,11 @@
 import { motion } from "framer-motion";
 import { Wrench, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/shared/components/ui/button";
 import heroImage from "@/assets/hero-dashboard.jpg";
 
 const HeroSection = () => {
+  const navigate = useNavigate();
   return (
     <section className="relative min-h-screen overflow-hidden">
       {/* Fixed electric background */}
@@ -44,10 +46,10 @@ const HeroSection = () => {
           <a href="#contact" className="hover:text-primary-foreground transition-colors">Contacto</a>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="ghost" className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10">
+          <Button variant="ghost" onClick={() => navigate('/login')} className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10">
             Iniciar sesión
           </Button>
-          <Button className="bg-gradient-accent text-accent-foreground font-semibold hover:opacity-90 transition-opacity">
+          <Button onClick={() => navigate('/registro')} className="bg-gradient-accent text-accent-foreground font-semibold hover:opacity-90 transition-opacity">
             Prueba gratis
           </Button>
         </div>
@@ -73,12 +75,12 @@ const HeroSection = () => {
               Órdenes de trabajo, seguimiento en tiempo real, notificaciones automáticas y dashboard inteligente. Todo lo que necesitás para profesionalizar tu servicio técnico.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
-              <Button size="lg" className="bg-gradient-accent text-accent-foreground font-semibold text-base px-8 hover:opacity-90 transition-opacity">
+              <Button size="lg" onClick={() => navigate('/registro')} className="bg-gradient-accent text-accent-foreground font-semibold text-base px-8 hover:opacity-90 transition-opacity">
                 Empezar gratis
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
-              <Button size="lg" className="bg-secondary text-secondary-foreground font-semibold hover:bg-secondary/90 transition-colors">
-                Ver demo
+              <Button size="lg" onClick={() => navigate('/login')} className="bg-secondary text-secondary-foreground font-semibold hover:bg-secondary/90 transition-colors">
+                Iniciar sesión
               </Button>
             </div>
             <div className="flex items-center gap-6 mt-8 text-sm text-primary-foreground/50">

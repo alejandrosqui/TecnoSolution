@@ -12,6 +12,7 @@ import { CustomersPage } from '@/app/pages/CustomersPage'
 import { StockPage } from '@/app/pages/StockPage'
 import { WarrantiesPage } from '@/app/pages/WarrantiesPage'
 import { PublicQueryPage } from '@/app/pages/PublicQueryPage'
+import { RegisterPage } from '@/app/pages/RegisterPage'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -24,6 +25,7 @@ function App() {
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/registro" element={<RegisterPage />} />
           <Route path="/consulta" element={<PublicQueryPage />} />
           <Route
             path="/app"

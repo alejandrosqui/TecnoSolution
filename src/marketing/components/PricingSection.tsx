@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { Check } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/shared/components/ui/button";
 
 const plans = [
@@ -55,6 +56,7 @@ const plans = [
 ];
 
 const PricingSection = () => {
+  const navigate = useNavigate();
   return (
     <section id="pricing" className="py-24 bg-muted/50">
       <div className="container mx-auto px-6">
@@ -115,6 +117,7 @@ const PricingSection = () => {
                     : ""
                 }`}
                 variant={plan.popular ? "default" : "outline"}
+                onClick={() => plan.name === "Empresa" ? window.location.href = "mailto:ventas@tecnosolution.com.ar" : navigate('/registro')}
               >
                 {plan.cta}
               </Button>
