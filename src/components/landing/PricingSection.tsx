@@ -6,6 +6,7 @@ const plans = [
   {
     name: "Gratis",
     price: "0",
+    currency: "",
     description: "Ideal para empezar y probar la plataforma.",
     features: [
       "1 local",
