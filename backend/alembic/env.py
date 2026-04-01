@@ -18,7 +18,7 @@ import app.models  # noqa - imports all models
 config = context.config
 config.set_main_option(
     "sqlalchemy.url",
-    settings.database_url.replace("+asyncpg", ""),  # psycopg2 for alembic
+    settings.database_url,  # keep +asyncpg for async engine
 )
 
 if config.config_file_name is not None:
