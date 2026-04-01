@@ -20,7 +20,7 @@ type LoginFormData = z.infer<typeof loginSchema>
 
 export function LoginPage() {
   const navigate = useNavigate()
-  const { login } = useAuthStore()
+  const { login, setContext } = useAuthStore()
   const [serverError, setServerError] = useState<string | null>(null)
 
   const {
@@ -37,13 +37,14 @@ export function LoginPage() {
       const tokens = await authService.login(data)
       localStorage.setItem('access_token', tokens.access_token)
       localStorage.setItem('refresh_token', tokens.refresh_token)
-      const me = await authService.me()
+      const [me, ctx] = await Promise.all([authService.me(), authService.context()])
       login(tokens.access_token, tokens.refresh_token, {
         id: me.id,
         email: me.email,
         full_name: me.full_name,
         is_superadmin: me.is_superadmin,
       })
+      setContext(ctx.branches)
       navigate('/app/dashboard')
     } catch {
       setServerError('Credenciales inválidas. Verificá tu email y contraseña.')

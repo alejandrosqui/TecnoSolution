@@ -162,6 +162,20 @@ async def get_work_order_history(
     return result.scalars().all()
 
 
+@router.get("/{work_order_id}/quotes")
+async def list_quotes_for_order(
+    work_order_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(Quote)
+        .where(Quote.work_order_id == work_order_id)
+        .order_by(Quote.created_at.desc())
+    )
+    return result.scalars().all()
+
+
 @router.post("/{work_order_id}/quotes")
 async def create_quote_for_order(
     work_order_id: UUID,

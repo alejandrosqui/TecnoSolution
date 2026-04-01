@@ -15,6 +15,8 @@ import {
   DialogFooter,
 } from '@/shared/components/ui/dialog'
 import { customerService, CustomerCreate } from '@/app/services/customerService'
+import { useAuthStore } from '@/app/store/authStore'
+import { toast } from 'sonner'
 
 const customerSchema = z.object({
   full_name: z.string().min(1, 'El nombre es requerido'),
@@ -27,6 +29,7 @@ type CustomerFormData = z.infer<typeof customerSchema>
 
 export function CustomersPage() {
   const queryClient = useQueryClient()
+  const { activeCompanyId } = useAuthStore()
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -52,10 +55,14 @@ export function CustomersPage() {
   })
 
   const onSubmit = async (data: CustomerFormData) => {
+    if (!activeCompanyId) {
+      toast.error('No tenés empresa asignada. Contactá al administrador.')
+      return
+    }
     setIsSaving(true)
     try {
       const payload: CustomerCreate = {
-        company_id: 'default', // placeholder; real app would get from context
+        company_id: activeCompanyId,
         full_name: data.full_name,
         email: data.email || undefined,
         phone: data.phone || undefined,
@@ -63,10 +70,11 @@ export function CustomersPage() {
       }
       await customerService.create(payload)
       await queryClient.invalidateQueries({ queryKey: ['customers'] })
+      toast.success('Cliente creado correctamente')
       reset()
       setDialogOpen(false)
     } catch {
-      // error handling can be expanded
+      toast.error('Error al crear el cliente')
     } finally {
       setIsSaving(false)
     }

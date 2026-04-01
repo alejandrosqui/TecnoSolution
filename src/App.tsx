@@ -9,6 +9,8 @@ import { DashboardPage } from '@/app/pages/DashboardPage'
 import { WorkOrdersPage } from '@/app/pages/WorkOrdersPage'
 import { WorkOrderDetailPage } from '@/app/pages/WorkOrderDetailPage'
 import { CustomersPage } from '@/app/pages/CustomersPage'
+import { StockPage } from '@/app/pages/StockPage'
+import { WarrantiesPage } from '@/app/pages/WarrantiesPage'
 import { PublicQueryPage } from '@/app/pages/PublicQueryPage'
 
 const queryClient = new QueryClient({
@@ -36,6 +38,8 @@ function App() {
             <Route path="work-orders" element={<WorkOrdersPage />} />
             <Route path="work-orders/:id" element={<WorkOrderDetailPage />} />
             <Route path="customers" element={<CustomersPage />} />
+            <Route path="stock" element={<StockPage />} />
+            <Route path="warranties" element={<WarrantiesPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

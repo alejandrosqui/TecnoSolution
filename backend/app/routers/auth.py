@@ -6,7 +6,8 @@ from app.core.database import get_db
 from app.core.security import verify_password, create_access_token, create_refresh_token, decode_token
 from app.core.config import settings
 from app.core.deps import get_current_user
-from app.models.user import User
+from app.models.company import Branch, Company
+from app.models.user import User, UserBranchAccess
 from app.schemas.auth import LoginRequest, TokenResponse, RefreshRequest
 from app.schemas.user import UserOut
 
@@ -56,3 +57,31 @@ async def refresh(data: RefreshRequest, db: AsyncSession = Depends(get_db)):
 @router.get("/me", response_model=UserOut)
 async def get_me(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+@router.get("/context")
+async def get_context(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(UserBranchAccess, Branch, Company)
+        .join(Branch, Branch.id == UserBranchAccess.branch_id)
+        .join(Company, Company.id == Branch.company_id)
+        .where(
+            UserBranchAccess.user_id == current_user.id,
+            UserBranchAccess.is_active == True,
+        )
+    )
+    rows = result.all()
+    branches = [
+        {
+            "branch_id": str(access.branch_id),
+            "branch_name": branch.name,
+            "company_id": str(branch.company_id),
+            "company_name": company.name,
+            "role": access.role,
+        }
+        for access, branch, company in rows
+    ]
+    return {"branches": branches}
