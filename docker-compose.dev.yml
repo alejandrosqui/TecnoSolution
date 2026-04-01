@@ -1,0 +1,29 @@
+# Development override — adds hot reload and mounts source code as volumes
+# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+name: tecnosolution
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8001 --reload
+    volumes:
+      - ./backend:/app
+    environment:
+      DEBUG: "true"
+      APP_ENV: development
+
+  postgres:
+    ports:
+      - "5433:5432"
+
+  redis:
+    ports:
+      - "6380:6379"
+
+  minio:
+    ports:
+      - "9000:9000"
+      - "9001:9001"
