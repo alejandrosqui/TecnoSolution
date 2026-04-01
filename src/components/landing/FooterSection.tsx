@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 
 const FooterSection = () => {
   return (
-    <footer id="contact" className="bg-hero py-16">
+    <footer id="contact" className="relative bg-hero py-16">
       <div className="container mx-auto px-6">
         {/* CTA */}
         <div className="text-center mb-16">
@@ -24,11 +24,19 @@ const FooterSection = () => {
             <div className="bg-gradient-primary p-1.5 rounded-lg">
               <Wrench className="w-4 h-4 text-primary-foreground" />
             </div>
-            <span className="font-heading text-sm font-bold text-primary-foreground">TecnoRep</span>
+            <span className="font-heading text-sm font-bold text-primary-foreground">TecnoSolution</span>
           </div>
           <p className="text-xs text-primary-foreground/40">
-            © 2026 TecnoRep. Todos los derechos reservados.
+            © 2026 TecnoSolution. Todos los derechos reservados.
           </p>
+          <a
+            href="https://patagoniasoftware.com.ar"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-primary-foreground/40 hover:text-primary-foreground/70 transition-colors"
+          >
+            Desarrollado por <span className="font-semibold text-primary-foreground/60">PatagoniaSoftware</span>
+          </a>
         </div>
       </div>
     </footer>

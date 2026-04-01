@@ -5,11 +5,29 @@ import heroImage from "@/assets/hero-dashboard.jpg";
 
 const HeroSection = () => {
   return (
-    <section className="relative min-h-screen bg-hero overflow-hidden">
-      {/* Decorative elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 left-10 w-72 h-72 rounded-full bg-primary/10 blur-3xl animate-pulse-glow" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 rounded-full bg-secondary/10 blur-3xl animate-pulse-glow" style={{ animationDelay: "1.5s" }} />
+    <section className="relative min-h-screen overflow-hidden">
+      {/* Fixed electric background */}
+      <div className="fixed inset-0 bg-hero -z-10">
+        {/* Electric grid lines */}
+        <div className="absolute inset-0 opacity-[0.07]"
+          style={{
+            backgroundImage: `
+              linear-gradient(hsl(185 70% 45% / 0.3) 1px, transparent 1px),
+              linear-gradient(90deg, hsl(185 70% 45% / 0.3) 1px, transparent 1px)
+            `,
+            backgroundSize: '60px 60px',
+          }}
+        />
+        {/* Animated electric pulses */}
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] rounded-full bg-primary/8 blur-[120px] animate-electric-pulse" />
+        <div className="absolute bottom-1/4 right-1/4 w-[400px] h-[400px] rounded-full bg-secondary/10 blur-[100px] animate-electric-pulse" style={{ animationDelay: "2s" }} />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-primary/5 blur-[150px] animate-electric-drift" />
+        {/* Spark lines */}
+        <svg className="absolute inset-0 w-full h-full opacity-[0.04]" xmlns="http://www.w3.org/2000/svg">
+          <line x1="0" y1="30%" x2="100%" y2="70%" stroke="hsl(185 70% 45%)" strokeWidth="1" className="animate-spark" />
+          <line x1="20%" y1="0" x2="80%" y2="100%" stroke="hsl(210 90% 55%)" strokeWidth="1" className="animate-spark" style={{ animationDelay: "1.5s" }} />
+          <line x1="100%" y1="20%" x2="0" y2="80%" stroke="hsl(185 70% 45%)" strokeWidth="1" className="animate-spark" style={{ animationDelay: "3s" }} />
+        </svg>
       </div>
 
       {/* Nav */}
@@ -18,7 +36,7 @@ const HeroSection = () => {
           <div className="bg-gradient-primary p-2 rounded-lg">
             <Wrench className="w-5 h-5 text-primary-foreground" />
           </div>
-          <span className="font-heading text-xl font-bold text-primary-foreground">TecnoRep</span>
+          <span className="font-heading text-xl font-bold text-primary-foreground">TecnoSolution</span>
         </div>
         <div className="hidden md:flex items-center gap-8 text-sm text-primary-foreground/70">
           <a href="#features" className="hover:text-primary-foreground transition-colors">Funcionalidades</a>
@@ -59,7 +77,7 @@ const HeroSection = () => {
                 Empezar gratis
                 <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
-              <Button size="lg" variant="outline" className="border-primary-foreground/20 text-primary-foreground hover:bg-primary-foreground/10">
+              <Button size="lg" className="bg-secondary text-secondary-foreground font-semibold hover:bg-secondary/90 transition-colors">
                 Ver demo
               </Button>
             </div>
@@ -79,7 +97,7 @@ const HeroSection = () => {
             <div className="relative rounded-2xl overflow-hidden shadow-elevated border border-primary-foreground/10">
               <img
                 src={heroImage}
-                alt="Dashboard de TecnoRep mostrando gestión de órdenes de trabajo"
+                alt="Dashboard de TecnoSolution mostrando gestión de órdenes de trabajo"
                 width={1280}
                 height={800}
                 className="w-full h-auto"
