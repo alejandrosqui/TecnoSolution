@@ -117,7 +117,7 @@ const PricingSection = () => {
                     : ""
                 }`}
                 variant={plan.popular ? "default" : "outline"}
-                onClick={() => plan.name === "Empresa" ? window.location.href = "mailto:ventas@tecnosolution.com.ar" : navigate('/registro')}
+                onClick={() => plan.name === "Empresa" ? window.location.href = "mailto:alejandrosqui080@gmail.com?subject=Consulta%20Plan%20Empresa%20-%20TecnoSolution" : navigate('/registro')}
               >
                 {plan.cta}
               </Button>
