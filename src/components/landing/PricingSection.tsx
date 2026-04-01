@@ -6,7 +6,6 @@ const plans = [
   {
     name: "Gratis",
     price: "0",
-    currency: "",
     description: "Ideal para empezar y probar la plataforma.",
     features: [
       "1 local",
@@ -21,7 +20,7 @@ const plans = [
   },
   {
     name: "Profesional",
-    price: "29",
+    price: "36.800",
     description: "Para talleres en crecimiento que necesitan más.",
     features: [
       "Hasta 3 locales",
@@ -38,7 +37,7 @@ const plans = [
   },
   {
     name: "Empresa",
-    price: "79",
+    price: "89.400",
     description: "Para cadenas y talleres con múltiples sucursales.",
     features: [
       "Locales ilimitados",
@@ -98,8 +97,8 @@ const PricingSection = () => {
                 <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>
               </div>
               <div className="mb-6">
-                <span className="font-heading text-4xl font-bold text-card-foreground">USD ${plan.price}</span>
-                <span className="text-muted-foreground text-sm">/mes por local</span>
+                <span className="font-heading text-4xl font-bold text-card-foreground">${plan.price}</span>
+                <span className="text-muted-foreground text-sm">{plan.price === "0" ? "" : "/mes por local"}</span>
               </div>
               <ul className="space-y-3 mb-8">
                 {plan.features.map((feature) => (
