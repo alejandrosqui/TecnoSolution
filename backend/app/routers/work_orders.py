@@ -34,10 +34,10 @@ class QuoteCreateBody(BaseModel):
     valid_until: Optional[dt.date] = None
     notes: Optional[str] = None
 
-
 async def _next_order_number(db: AsyncSession, company_id: UUID) -> str:
     year = dt.datetime.utcnow().year
-    prefix = f"WO-{year}-"
+    # Prefijo único por empresa (últimos 4 chars del UUID)
+    prefix = f"WO-{year}-{str(company_id)[-4:].upper()}-"
     result = await db.execute(
         select(WorkOrder.order_number)
         .join(Branch, Branch.id == WorkOrder.branch_id)
