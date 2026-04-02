@@ -7,7 +7,14 @@ class Settings(BaseSettings):
     app_env: str = "development"
     debug: bool = True
     secret_key: str
-    allowed_origins: List[str] = ["http://localhost:5173", "http://localhost:3000"]
+    allowed_origins: List[str] = [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://tecnosolution.com.ar",
+        "https://www.tecnosolution.com.ar",
+        "http://tecnosolution.com.ar",
+        "http://www.tecnosolution.com.ar",
+    ]
 
     # Database
     database_url: str
