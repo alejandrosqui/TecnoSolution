@@ -35,10 +35,13 @@ class QuoteCreateBody(BaseModel):
     notes: Optional[str] = None
 
 
-async def _next_order_number(db: AsyncSession) -> str:
+async def _next_order_number(db: AsyncSession, company_id: UUID) -> str:
     year = dt.datetime.utcnow().year
     result = await db.execute(
-        select(func.count(WorkOrder.id)).where(
+        select(func.count(WorkOrder.id))
+        .join(Branch, Branch.id == WorkOrder.branch_id)
+        .where(
+            Branch.company_id == company_id,
             func.extract("year", WorkOrder.created_at) == year
         )
     )
@@ -87,7 +90,7 @@ async def create_work_order(
     await check_order_limit(branch.company_id, data.branch_id, db)
 
     order = WorkOrder(
-        order_number=await _next_order_number(db),
+        order_number=await _next_order_number(db, branch.company_id),
         branch_id=data.branch_id,
         customer_id=data.customer_id,
         device_id=data.device_id,
