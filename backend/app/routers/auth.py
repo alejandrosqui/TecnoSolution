@@ -11,6 +11,8 @@ from app.core.security import verify_password, create_access_token, create_refre
 from app.core.config import settings
 from app.core.deps import get_current_user
 from app.models.company import Branch, Company
+from datetime import datetime, timedelta
+from app.models.plan import Plan, Subscription
 from app.models.user import User, UserBranchAccess
 from app.schemas.auth import LoginRequest, TokenResponse, RefreshRequest
 from app.schemas.user import UserOut
@@ -61,6 +63,18 @@ async def register(data: RegisterRequest, db: AsyncSession = Depends(get_db)):
     company = Company(name=data.company_name, slug=slug, email=data.email)
     db.add(company)
     await db.flush()
+    # Create default subscription (use first active plan or create basic)
+    plan_result = await db.execute(select(Plan).where(Plan.is_active == True).limit(1))
+    plan = plan_result.scalar_one_or_none()
+    if plan:
+        subscription = Subscription(
+            company_id=company.id,
+            plan_id=plan.id,
+            status="active",
+            current_period_start=datetime.utcnow(),
+            current_period_end=datetime.utcnow() + timedelta(days=365),
+        )
+        db.add(subscription)
 
     # Create default branch
     branch = Branch(company_id=company.id, name="Casa central", email=data.email)

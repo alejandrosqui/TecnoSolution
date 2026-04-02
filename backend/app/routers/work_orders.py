@@ -53,7 +53,17 @@ async def list_work_orders(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    query = select(WorkOrder)
+    from app.models.user import UserBranchAccess
+    # Obtener solo los branches del usuario logueado
+    access_result = await db.execute(
+        select(UserBranchAccess.branch_id).where(
+            UserBranchAccess.user_id == current_user.id,
+            UserBranchAccess.is_active == True,
+        )
+    )
+    user_branch_ids = [row[0] for row in access_result.all()]
+
+    query = select(WorkOrder).where(WorkOrder.branch_id.in_(user_branch_ids))
     if branch_id:
         query = query.where(WorkOrder.branch_id == branch_id)
     if status:
