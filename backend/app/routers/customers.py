@@ -20,7 +20,20 @@ async def list_customers(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    query = select(Customer)
+    from app.models.user import UserBranchAccess
+    from app.models.company import Branch
+    # Obtener companies del usuario logueado
+    access_result = await db.execute(
+        select(Branch.company_id).join(
+            UserBranchAccess, UserBranchAccess.branch_id == Branch.id
+        ).where(
+            UserBranchAccess.user_id == current_user.id,
+            UserBranchAccess.is_active == True,
+        )
+    )
+    user_company_ids = [row[0] for row in access_result.all()]
+
+    query = select(Customer).where(Customer.company_id.in_(user_company_ids))
     if search:
         query = query.where(
             Customer.full_name.ilike(f"%{search}%")
