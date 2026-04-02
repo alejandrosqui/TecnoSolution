@@ -37,16 +37,23 @@ class QuoteCreateBody(BaseModel):
 
 async def _next_order_number(db: AsyncSession, company_id: UUID) -> str:
     year = dt.datetime.utcnow().year
+    prefix = f"WO-{year}-"
     result = await db.execute(
-        select(func.count(WorkOrder.id))
+        select(WorkOrder.order_number)
         .join(Branch, Branch.id == WorkOrder.branch_id)
         .where(
             Branch.company_id == company_id,
-            func.extract("year", WorkOrder.created_at) == year
+            WorkOrder.order_number.like(f"{prefix}%"),
         )
+        .order_by(WorkOrder.order_number.desc())
+        .limit(1)
     )
-    count = result.scalar() or 0
-    return f"WO-{year}-{count + 1:06d}"
+    last = result.scalar()
+    if last:
+        last_num = int(last.split("-")[-1])
+    else:
+        last_num = 0
+    return f"{prefix}{last_num + 1:06d}"
 
 
 @router.get("/", response_model=List[WorkOrderOut])
