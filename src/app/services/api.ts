@@ -1,5 +1,6 @@
 import axios from 'axios'
 
+// v2
 const API_URL = import.meta.env.VITE_API_URL || 'https://api.tecnosolution.com.ar'
 
 export const api = axios.create({
