@@ -54,6 +54,9 @@ export function WorkOrderDetailPage() {
   const [newStatus, setNewStatus] = useState<WorkOrderStatus | ''>('')
   const [statusComment, setStatusComment] = useState('')
   const [isUpdating, setIsUpdating] = useState(false)
+  
+  // 👇 NUEVO: Estado para las horas estimadas
+  const [estimatedHours, setEstimatedHours] = useState<string>('')
 
   const [quoteDialogOpen, setQuoteDialogOpen] = useState(false)
   const [quoteItems, setQuoteItems] = useState<QuoteItem[]>([emptyItem()])
@@ -118,6 +121,7 @@ const { data: companySettings } = useQuery({
     enabled: !!id,
   })
 
+  // 👇 MODIFICADO: Función para actualizar estado con estimated_hours
   const handleUpdateStatus = async () => {
     if (!newStatus || !id) return
     setIsUpdating(true)
@@ -125,12 +129,14 @@ const { data: companySettings } = useQuery({
       await workOrderService.updateStatus(id, {
         status: newStatus as WorkOrderStatus,
         comment: statusComment || undefined,
+        estimated_hours: estimatedHours ? Number(estimatedHours) : undefined, // 👈 NUEVO: enviar horas estimadas
       })
       await queryClient.invalidateQueries({ queryKey: ['work-order', id] })
       await queryClient.invalidateQueries({ queryKey: ['work-order-history', id] })
       setStatusDialogOpen(false)
       setNewStatus('')
       setStatusComment('')
+      setEstimatedHours('') // 👈 NUEVO: limpiar horas estimadas
       toast.success('Estado actualizado')
     } catch {
       toast.error('Error al actualizar el estado')
@@ -413,7 +419,9 @@ const { data: companySettings } = useQuery({
 
 {/* Change status dialog */}
 
-      {/* Change status dialog */}
+      {/* ============================================ */}
+      {/* DIALOG DE CAMBIO DE ESTADO (MODIFICADO) */}
+      {/* ============================================ */}
       <Dialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -433,6 +441,7 @@ const { data: companySettings } = useQuery({
                 </SelectContent>
               </Select>
             </div>
+            
             <div className="space-y-1.5">
               <Label htmlFor="status-comment">Comentario (opcional)</Label>
               <textarea
@@ -444,6 +453,33 @@ const { data: companySettings } = useQuery({
                 className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 resize-none"
               />
             </div>
+
+            {/* 👇 NUEVO: Selector de horas estimadas (solo para ciertos estados) */}
+            {['diagnosing', 'waiting_parts', 'repairing', 'ready_for_pickup'].includes(newStatus) && (
+              <div className="space-y-1.5">
+                <Label htmlFor="estimated-hours">Tiempo estimado para el próximo paso</Label>
+                <Select onValueChange={setEstimatedHours} value={estimatedHours}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Usar tiempo por defecto de Settings" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2">2 horas</SelectItem>
+                    <SelectItem value="4">4 horas</SelectItem>
+                    <SelectItem value="8">8 horas (1 día)</SelectItem>
+                    <SelectItem value="24">24 horas</SelectItem>
+                    <SelectItem value="48">48 horas (2 días)</SelectItem>
+                    <SelectItem value="72">72 horas (3 días)</SelectItem>
+                    <SelectItem value="120">5 días</SelectItem>
+                    <SelectItem value="168">7 días</SelectItem>
+                    <SelectItem value="240">10 días</SelectItem>
+                    <SelectItem value="336">14 días</SelectItem>
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-400">
+                  Si no seleccionás, usa el tiempo configurado en Settings
+                </p>
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setStatusDialogOpen(false)}>Cancelar</Button>

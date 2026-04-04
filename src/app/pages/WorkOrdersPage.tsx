@@ -17,6 +17,8 @@ import { deviceService } from '@/app/services/deviceService'
 import { useAuthStore } from '@/app/store/authStore'
 import { STATUS_LABELS, STATUS_COLORS } from './DashboardPage'
 import { toast } from 'sonner'
+// 👇 NUEVO IMPORT
+import api from '@/app/services/api'
 
 const ALL_STATUSES: WorkOrderStatus[] = [
   'received', 'queued', 'diagnosing', 'waiting_customer_approval', 'quote_sent',
@@ -104,6 +106,38 @@ const newOrderSchema = z.object({
 
 type NewOrderForm = z.infer<typeof newOrderSchema>
 
+// 👇 NUEVA FUNCIÓN: calcula el nivel de alerta según settings
+function getAlertLevel(order: WorkOrder, settings?: any): 'green' | 'yellow' | 'red' {
+  const finalStatuses = ['delivered', 'cancelled', 'warranty']
+  if (finalStatuses.includes(order.status)) return 'green'
+
+  const defaultHours = {
+    received: settings?.default_diagnosis_hours || 48,
+    diagnosing: settings?.default_diagnosis_hours || 48,
+    repairing: settings?.default_repair_hours || 48,
+    waiting_parts: (settings?.default_waiting_days || 7) * 24,
+    ready_for_pickup: (settings?.default_pickup_days || 10) * 24,
+  }
+
+  const deadline = (order as any).deadline_at
+  if (deadline) {
+    const now = Date.now()
+    const deadlineTime = new Date(deadline).getTime()
+    const totalTime = deadlineTime - new Date(order.received_at).getTime()
+    const elapsed = now - new Date(order.received_at).getTime()
+    const pct = elapsed / totalTime
+    if (now > deadlineTime) return 'red'
+    if (pct > 0.8) return 'yellow'
+    return 'green'
+  }
+
+  const maxHours = defaultHours[order.status as keyof typeof defaultHours] || 48
+  const hours = (Date.now() - new Date(order.received_at).getTime()) / 3600000
+  if (hours > maxHours) return 'red'
+  if (hours > maxHours * 0.8) return 'yellow'
+  return 'green'
+}
+
 export function WorkOrdersPage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -120,17 +154,24 @@ export function WorkOrdersPage() {
   const [customerSearch, setCustomerSearch] = useState('')
   const [isSaving, setIsSaving] = useState(false)
 
+  // ============================================
+  // 🔍 QUERY 1: Órdenes de trabajo (YA EXISTENTE)
+  // ============================================
   const { data: orders = [], isLoading } = useQuery({
     queryKey: ['work-orders'],
     queryFn: () => workOrderService.list(),
   })
 
+  // ============================================
+  // 🔍 QUERY 2: Clientes (YA EXISTENTE)
+  // ============================================
   const { data: customers = [] } = useQuery({
     queryKey: ['customers', customerSearch],
     queryFn: () => customerService.list(customerSearch || undefined),
     enabled: dialogOpen,
   })
 
+<<<<<<< HEAD
   // Filtrado local
   const filteredOrders = useMemo(() => {
     return orders.filter(order => {
@@ -155,6 +196,27 @@ export function WorkOrdersPage() {
   }, [orders, statusFilter, alertFilter, deviceTypeFilter, brandFilter, searchText])
 
   const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<NewOrderForm>({
+=======
+  // ============================================
+  // 🔍 QUERY 3: Configuración de la empresa (NUEVO)
+  // ============================================
+  const { data: companySettings } = useQuery({
+    queryKey: ['my-settings'],
+    queryFn: async () => {
+      const { data } = await api.get('/api/companies/my/settings')
+      return data
+    },
+  })
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    reset,
+    formState: { errors },
+  } = useForm<NewOrderForm>({
+>>>>>>> ed93feb (arreglo de pages WorkOrderDetailPage.tsx y de WorkOrderDetailPage)
     resolver: zodResolver(newOrderSchema),
     defaultValues: { customer_mode: 'existing', priority: 'normal' },
   })
@@ -205,6 +267,14 @@ export function WorkOrdersPage() {
       setIsSaving(false)
     }
   }
+
+  // 👇 FILTRAR órdenes (si querés ocultar rojos, acá se aplica)
+  // const filteredOrders = orders.filter(order => {
+  //   const alert = getAlertLevel(order, companySettings)
+  //   // Si tenés un toggle "ocultar rojos", agregá la condición
+  //   // return ocultarRojos ? alert !== 'red' : true
+  //   return true
+  // })
 
   return (
     <div className="p-6 space-y-4">
@@ -329,6 +399,7 @@ export function WorkOrdersPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-gray-50">
+<<<<<<< HEAD
                   <th className="w-6 px-3 py-3"></th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">N° Orden</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Cliente</th>
@@ -343,10 +414,31 @@ export function WorkOrdersPage() {
                 {filteredOrders.map((order) => {
                   const alert = getAlertLevel(order)
                   const orderAny = order as any
+=======
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">N° Orden</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Estado</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Prioridad</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Fecha recepción</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Alerta</th>
+                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Costo final</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {orders.map((order) => {
+                  // 👇 ACÁ SE USA companySettings en getAlertLevel
+                  const alert = getAlertLevel(order, companySettings)
+                  // 👇 Definir colores según nivel de alerta
+                  const alertColors = {
+                    green: 'bg-green-100 text-green-800',
+                    yellow: 'bg-yellow-100 text-yellow-800',
+                    red: 'bg-red-100 text-red-800 animate-pulse', // el rojo con pulso suave
+                  }
+>>>>>>> ed93feb (arreglo de pages WorkOrderDetailPage.tsx y de WorkOrderDetailPage)
                   return (
                     <tr
                       key={order.id}
                       onClick={() => navigate(`/app/work-orders/${order.id}`)}
+<<<<<<< HEAD
                       className={`hover:opacity-80 cursor-pointer transition-colors ${ALERT_ROW_COLORS[alert]}`}
                     >
                       <td className="px-3 py-3">
@@ -382,22 +474,57 @@ export function WorkOrdersPage() {
                         {getElapsedLabel(order.received_at)}
                       </td>
                     </tr>
+=======
+                      className="hover:bg-blue-50 cursor-pointer transition-colors"
+                    >
+                      <td className="px-6 py-3 font-mono text-blue-600 font-medium">{order.order_number}</td>
+                      <td className="px-6 py-3">
+                        <Badge className={`${STATUS_COLORS[order.status]} border-0 font-medium`}>
+                          {STATUS_LABELS[order.status]}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-3 text-gray-600 capitalize">{order.priority}</td>
+                      <td className="px-6 py-3 text-gray-500">
+                        {new Date(order.received_at).toLocaleDateString('es-AR', {
+                          day: '2-digit', month: '2-digit', year: 'numeric',
+                        })}
+                      </td>
+                      <td className="px-6 py-3">
+                        <Badge className={`${alertColors[alert]} border-0 font-medium`}>
+                          {alert === 'green' ? '✅ Normal' : alert === 'yellow' ? '⚠️ Próximo vencimiento' : '🔴 Vencido'}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-3 text-gray-600">
+                        {order.final_cost != null
+                          ? `$${order.final_cost.toLocaleString('es-AR')}`
+                          : '—'}
+                       </td>
+                     </tr>
+>>>>>>> ed93feb (arreglo de pages WorkOrderDetailPage.tsx y de WorkOrderDetailPage)
                   )
                 })}
               </tbody>
-            </table>
+             </table>
           </div>
         )}
       </div>
 
+<<<<<<< HEAD
       {/* Dialog nueva orden */}
+=======
+      {/* Dialog de nueva orden (sin cambios) */}
+>>>>>>> ed93feb (arreglo de pages WorkOrderDetailPage.tsx y de WorkOrderDetailPage)
       <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) reset() }}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nueva orden de trabajo</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 py-2">
+<<<<<<< HEAD
             {/* CLIENTE */}
+=======
+            {/* — CLIENTE — */}
+>>>>>>> ed93feb (arreglo de pages WorkOrderDetailPage.tsx y de WorkOrderDetailPage)
             <div className="space-y-3">
               <p className="text-sm font-semibold text-gray-700 border-b pb-1">Cliente</p>
               <div className="flex gap-2">
