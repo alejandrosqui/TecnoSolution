@@ -3,7 +3,7 @@ import secrets
 from decimal import Decimal
 from typing import List, Optional
 from uuid import UUID
-
+from app.core.email import send_status_email
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 from sqlalchemy import select, func
@@ -64,7 +64,8 @@ async def list_work_orders(
     db: AsyncSession = Depends(get_db),
 ):
     from app.models.user import UserBranchAccess
-    # Obtener solo los branches del usuario logueado
+    from app.models.customer import Customer
+    from app.models.device import Device
     access_result = await db.execute(
         select(UserBranchAccess.branch_id).where(
             UserBranchAccess.user_id == current_user.id,
@@ -80,7 +81,38 @@ async def list_work_orders(
         query = query.where(WorkOrder.status == status)
     query = query.order_by(WorkOrder.created_at.desc()).limit(100)
     result = await db.execute(query)
-    return result.scalars().all()
+    orders = result.scalars().all()
+
+    # Enriquecer con datos de cliente y dispositivo
+    enriched = []
+    for order in orders:
+        customer_result = await db.execute(select(Customer).where(Customer.id == order.customer_id))
+        customer = customer_result.scalar_one_or_none()
+        device_result = await db.execute(select(Device).where(Device.id == order.device_id))
+        device = device_result.scalar_one_or_none()
+        order_dict = {
+            "id": order.id,
+            "order_number": order.order_number,
+            "status": order.status,
+            "priority": order.priority,
+            "customer_id": order.customer_id,
+            "device_id": order.device_id,
+            "branch_id": order.branch_id,
+            "assigned_to": order.assigned_to,
+            "problem_description": order.problem_description,
+            "diagnosis_notes": order.diagnosis_notes,
+            "final_cost": order.final_cost,
+            "received_at": order.received_at,
+            "created_at": order.created_at,
+            "public_token": order.public_token,
+            "customer_name": customer.full_name if customer else None,
+            "customer_phone": customer.phone if customer else None,
+            "device_brand": device.brand if device else None,
+            "device_model": device.model if device else None,
+            "device_type": device.device_type if device else None,
+        }
+        enriched.append(WorkOrderOut(**order_dict))
+    return enriched
 
 
 @router.post("/", response_model=WorkOrderOut)
@@ -89,6 +121,10 @@ async def create_work_order(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
+    from app.models.company import Branch, Company
+    from app.models.plan import Subscription
+    import datetime as dt_module
+
     result = await db.execute(select(Branch).where(Branch.id == data.branch_id))
     branch = result.scalar_one_or_none()
     if not branch:
@@ -96,21 +132,33 @@ async def create_work_order(
 
     await check_order_limit(branch.company_id, data.branch_id, db)
 
+    # Obtener settings de la empresa para el deadline por defecto
+    company_result = await db.execute(select(Company).where(Company.id == branch.company_id))
+    company = company_result.scalar_one_or_none()
+    default_hours = getattr(company, 'default_diagnosis_hours', 48) or 48
+
+    # Calcular deadline
+    hours = data.estimated_hours or default_hours
+    deadline = dt_module.datetime.utcnow() + dt_module.timedelta(hours=hours)
+
     order = WorkOrder(
         order_number=await _next_order_number(db, branch.company_id),
         branch_id=data.branch_id,
         customer_id=data.customer_id,
         device_id=data.device_id,
         assigned_to=current_user.id,
+        receptionist_id=current_user.id,
         status="received",
         priority=data.priority,
         problem_description=data.problem_description,
         estimated_cost=data.estimated_cost,
-        received_at=dt.datetime.utcnow(),
+        received_at=dt_module.datetime.utcnow(),
+        deadline_at=deadline,
+        alert_level="green",
         public_token=secrets.token_urlsafe(16),
     )
     db.add(order)
-    await db.flush()  # obtener order.id antes del historial
+    await db.flush()
 
     history = WorkOrderStatusHistory(
         work_order_id=order.id,
@@ -125,8 +173,25 @@ async def create_work_order(
     await db.refresh(order)
     await increment_order_counter(branch.company_id, db)
 
-    return order
-
+    return WorkOrderOut(
+        id=order.id,
+        order_number=order.order_number,
+        status=order.status,
+        priority=order.priority,
+        customer_id=order.customer_id,
+        device_id=order.device_id,
+        branch_id=order.branch_id,
+        assigned_to=order.assigned_to,
+        receptionist_id=order.receptionist_id,
+        problem_description=order.problem_description,
+        diagnosis_notes=order.diagnosis_notes,
+        final_cost=order.final_cost,
+        received_at=order.received_at,
+        created_at=order.created_at,
+        deadline_at=order.deadline_at,
+        alert_level=order.alert_level,
+        public_token=order.public_token,
+    )
 
 @router.get("/{order_id}", response_model=WorkOrderOut)
 async def get_work_order(
@@ -165,6 +230,35 @@ async def update_work_order_status(
     )
     db.add(history)
     await db.commit()
+    try:
+        from app.models.customer import Customer
+        from app.models.company import Branch, Company
+        customer_result = await db.execute(select(Customer).where(Customer.id == order.customer_id))
+        customer = customer_result.scalar_one_or_none()
+        branch_result = await db.execute(
+            select(Company).join(Branch, Branch.company_id == Company.id)
+            .where(Branch.id == order.branch_id)
+        )
+        company = branch_result.scalar_one_or_none()
+        status_display = {
+            "received": "Recibido", "queued": "En cola", "diagnosing": "En diagnóstico",
+            "waiting_customer_approval": "Esperando aprobación", "quote_sent": "Presupuesto enviado",
+            "approved": "Aprobado", "rejected": "Rechazado", "waiting_parts": "Esperando repuestos",
+            "repairing": "En reparación", "repaired": "Reparado",
+            "ready_for_pickup": "Listo para retirar", "delivered": "Entregado",
+            "warranty": "En garantía", "cancelled": "Cancelado",
+        }.get(data.status, data.status)
+        if customer and customer.email:
+            await send_status_email(
+                to_email=customer.email,
+                customer_name=customer.full_name,
+                order_number=order.order_number,
+                status_display=status_display,
+                company_name=company.name if company else "TecnoSolution",
+                public_token=order.public_token,
+            )
+    except Exception as e:
+        print(f"EMAIL ERROR: {e}")
     return {"status": "updated", "new_status": data.status}
 
 

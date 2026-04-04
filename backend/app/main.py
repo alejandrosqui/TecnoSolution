@@ -4,7 +4,7 @@
 from fastapi import FastAPI
 
 from app.core.config import settings
-from app.routers import auth, companies, users, customers, work_orders, quotes, products, plans, public, devices
+from app.routers import auth, companies, users, customers, work_orders, quotes, products, plans, public, devices, storage
 
 app = FastAPI(
     title=settings.app_name,
@@ -25,7 +25,7 @@ app.include_router(products.router, prefix="/api/products", tags=["Products"])
 app.include_router(plans.router, prefix="/api/plans", tags=["Plans"])
 app.include_router(devices.router, prefix="/api/devices", tags=["Devices"])
 app.include_router(public.router, prefix="/api/public", tags=["Public"])
-
+app.include_router(storage.router, prefix="/api/storage", tags=["Storage"])
 
 @app.get("/api/health")
 async def health_check():

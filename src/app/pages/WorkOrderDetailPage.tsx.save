@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Loader2, RefreshCw, FileText, Plus, Trash2, Camera, Printer } from 'lucide-react'
+import { ArrowLeft, Loader2, RefreshCw, FileText, Plus, Trash2, Camera } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { Badge } from '@/shared/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
@@ -19,7 +19,7 @@ import { workOrderService, WorkOrderStatus } from '@/app/services/workOrderServi
 import { STATUS_LABELS, STATUS_COLORS } from './DashboardPage'
 import api from '@/app/services/api'
 import { toast } from 'sonner'
-import { PrintTicket } from '@/app/components/PrintTicket'
+
 
 const ALL_STATUSES: WorkOrderStatus[] = [
   'received', 'queued', 'diagnosing', 'waiting_customer_approval', 'quote_sent',
@@ -62,7 +62,6 @@ export function WorkOrderDetailPage() {
   const [isSavingQuote, setIsSavingQuote] = useState(false)
   const [photos, setPhotos] = useState<{id: string, filename: string, url: string}[]>([])
   const [isUploadingPhotos, setIsUploadingPhotos] = useState(false)
-  const [showPrintTicket, setShowPrintTicket] = useState(false)
 
   const { data: order, isLoading: orderLoading } = useQuery({
     queryKey: ['work-order', id],
@@ -84,31 +83,6 @@ export function WorkOrderDetailPage() {
     },
     enabled: !!id,
   })
-const { data: customer } = useQuery({
-  queryKey: ['customer', order?.customer_id],
-  queryFn: async () => {
-    const { data } = await api.get(`/api/customers/${order!.customer_id}`)
-    return data
-  },
-  enabled: !!order?.customer_id,
-})
-
-const { data: device } = useQuery({
-  queryKey: ['device', order?.device_id],
-  queryFn: async () => {
-    const { data } = await api.get(`/api/devices/${order!.device_id}`)
-    return data
-  },
-  enabled: !!order?.device_id,
-})
-
-const { data: companySettings } = useQuery({
-  queryKey: ['my-settings'],
-  queryFn: async () => {
-    const { data } = await api.get('/api/companies/my/settings')
-    return data
-  },
-})
   const { data: photosData, refetch: refetchPhotos } = useQuery({
     queryKey: ['work-order-photos', id],
     queryFn: async () => {
@@ -239,10 +213,6 @@ const { data: companySettings } = useQuery({
             <FileText className="w-4 h-4" />
             Presupuesto
           </Button>
-         <Button variant="outline" onClick={() => { setShowPrintTicket(true); setTimeout(() => window.print(), 300) }} className="gap-2">
-           <Printer className="w-4 h-4" />
-           Imprimir ticket
-         </Button>
           <Button onClick={() => setStatusDialogOpen(true)} className="gap-2">
             <RefreshCw className="w-4 h-4" />
             Cambiar estado
@@ -400,18 +370,6 @@ const { data: companySettings } = useQuery({
       )}
     </CardContent>
   </Card>
-{showPrintTicket && (
-  <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
-    <PrintTicket
-      order={order}
-      customer={customer}
-      device={device}
-      companySettings={companySettings}
-    />
-  </div>
-)}
-
-{/* Change status dialog */}
 
       {/* Change status dialog */}
       <Dialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>

@@ -46,6 +46,21 @@ async def get_public_order_status(
     branch_result = await db.execute(select(Branch).where(Branch.id == order.branch_id))
     branch = branch_result.scalar_one_or_none()
 
+@router.get("/token/{public_token}", response_model=WorkOrderPublicOut)
+async def get_public_order_by_token(
+    public_token: str,
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(
+        select(WorkOrder).where(WorkOrder.public_token == public_token)
+    )
+    order = result.scalar_one_or_none()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    device_result = await db.execute(select(Device).where(Device.id == order.device_id))
+    device = device_result.scalar_one_or_none()
+    branch_result = await db.execute(select(Branch).where(Branch.id == order.branch_id))
+    branch = branch_result.scalar_one_or_none()
     return WorkOrderPublicOut(
         order_number=order.order_number,
         status=order.status,
@@ -56,3 +71,5 @@ async def get_public_order_status(
         device_model=device.model if device else "N/A",
         branch_name=branch.name if branch else "N/A",
     )
+
+

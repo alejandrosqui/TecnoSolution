@@ -13,6 +13,7 @@ import { StockPage } from '@/app/pages/StockPage'
 import { WarrantiesPage } from '@/app/pages/WarrantiesPage'
 import { PublicQueryPage } from '@/app/pages/PublicQueryPage'
 import { RegisterPage } from '@/app/pages/RegisterPage'
+import { SettingsPage } from '@/app/pages/SettingsPage'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -42,6 +43,7 @@ function App() {
             <Route path="customers" element={<CustomersPage />} />
             <Route path="stock" element={<StockPage />} />
             <Route path="warranties" element={<WarrantiesPage />} />
+	    <Route path="settings" element={<SettingsPage />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

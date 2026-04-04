@@ -16,11 +16,11 @@ const features = [
     title: "Órdenes de trabajo completas",
     description: "Recepción con datos del cliente, dispositivo, fotos de ingreso, firma digital y comprobante PDF automático.",
   },
-  {
-    icon: Bell,
-    title: "Notificaciones automáticas",
-    description: "WhatsApp y email automático en cada cambio de estado. Tu cliente siempre informado sin esfuerzo.",
-  },
+{
+  icon: MessageSquare,
+  title: "Consulta de estado online",
+  description: "El cliente escanea el QR del ticket y ve el estado de su reparación en tiempo real, sin llamadas.",
+},
   {
     icon: BarChart3,
     title: "Dashboard inteligente",

@@ -44,11 +44,17 @@ class WorkOrder(UUIDMixin, TimestampMixin, Base):
     estimated_ready_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     delivered_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
     public_token: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    receptionist_id: Mapped[Optional[uuid.UUID]] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("users.id"), nullable=True
+    )
+    deadline_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+    alert_level: Mapped[str] = mapped_column(String(10), nullable=False, default="green")
 
     branch: Mapped["Branch"] = relationship("Branch", back_populates="work_orders")
     customer: Mapped["Customer"] = relationship("Customer", back_populates="work_orders")
     device: Mapped["Device"] = relationship("Device", back_populates="work_orders")
     assigned_user: Mapped[Optional["User"]] = relationship("User", foreign_keys=[assigned_to])
+    receptionist: Mapped[Optional["User"]] = relationship("User", foreign_keys=[receptionist_id])
 
     status_history: Mapped[List["WorkOrderStatusHistory"]] = relationship(
         "WorkOrderStatusHistory", back_populates="work_order"
