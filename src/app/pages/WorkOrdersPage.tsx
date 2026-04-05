@@ -36,31 +36,6 @@ const PRIORITY_LABELS: Record<string, string> = {
   low: 'Baja', normal: 'Normal', high: 'Alta', urgent: 'Urgente'
 }
 
-// Calcula el nivel de alerta basado en el deadline
-function getAlertLevel(order: WorkOrder): 'green' | 'yellow' | 'red' {
-  const finalStatuses = ['delivered', 'cancelled', 'warranty']
-  if (finalStatuses.includes(order.status)) return 'green'
-  
-  const deadline = (order as any).deadline_at
-  if (!deadline) {
-    // Sin deadline: calcular por antigüedad (48hs por defecto)
-    const hours = (Date.now() - new Date(order.received_at).getTime()) / 3600000
-    if (hours > 96) return 'red'
-    if (hours > 48) return 'yellow'
-    return 'green'
-  }
-  
-  const now = Date.now()
-  const deadlineTime = new Date(deadline).getTime()
-  const totalTime = deadlineTime - new Date(order.received_at).getTime()
-  const elapsed = now - new Date(order.received_at).getTime()
-  const pct = elapsed / totalTime
-
-  if (now > deadlineTime) return 'red'
-  if (pct > 0.8) return 'yellow'
-  return 'green'
-}
-
 const ALERT_COLORS = {
   green: 'bg-green-500',
   yellow: 'bg-yellow-400',
@@ -170,12 +145,18 @@ export function WorkOrdersPage() {
     queryFn: () => customerService.list(customerSearch || undefined),
     enabled: dialogOpen,
   })
+  const { data: companySettings } = useQuery({
+      queryKey: ['my-settings'],
+      queryFn: async () => {
+        const { data } = await api.get('/api/companies/my/settings')
+        return data
+      },
+    })
 
-<<<<<<< HEAD
   // Filtrado local
   const filteredOrders = useMemo(() => {
     return orders.filter(order => {
-      const alert = getAlertLevel(order)
+      const alert = getAlertLevel(order, companySettings)
       const orderAny = order as any
 
       if (statusFilter !== 'all' && order.status !== statusFilter) return false
@@ -193,30 +174,9 @@ export function WorkOrdersPage() {
       }
       return true
     })
-  }, [orders, statusFilter, alertFilter, deviceTypeFilter, brandFilter, searchText])
+  }, [orders, statusFilter, alertFilter, deviceTypeFilter, brandFilter, searchText, companySettings])
 
   const { register, handleSubmit, watch, setValue, reset, formState: { errors } } = useForm<NewOrderForm>({
-=======
-  // ============================================
-  // 🔍 QUERY 3: Configuración de la empresa (NUEVO)
-  // ============================================
-  const { data: companySettings } = useQuery({
-    queryKey: ['my-settings'],
-    queryFn: async () => {
-      const { data } = await api.get('/api/companies/my/settings')
-      return data
-    },
-  })
-
-  const {
-    register,
-    handleSubmit,
-    watch,
-    setValue,
-    reset,
-    formState: { errors },
-  } = useForm<NewOrderForm>({
->>>>>>> ed93feb (arreglo de pages WorkOrderDetailPage.tsx y de WorkOrderDetailPage)
     resolver: zodResolver(newOrderSchema),
     defaultValues: { customer_mode: 'existing', priority: 'normal' },
   })
@@ -399,7 +359,6 @@ export function WorkOrdersPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b bg-gray-50">
-<<<<<<< HEAD
                   <th className="w-6 px-3 py-3"></th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">N° Orden</th>
                   <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Cliente</th>
@@ -414,31 +373,10 @@ export function WorkOrdersPage() {
                 {filteredOrders.map((order) => {
                   const alert = getAlertLevel(order)
                   const orderAny = order as any
-=======
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">N° Orden</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Estado</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Prioridad</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Fecha recepción</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Alerta</th>
-                  <th className="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Costo final</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-100">
-                {orders.map((order) => {
-                  // 👇 ACÁ SE USA companySettings en getAlertLevel
-                  const alert = getAlertLevel(order, companySettings)
-                  // 👇 Definir colores según nivel de alerta
-                  const alertColors = {
-                    green: 'bg-green-100 text-green-800',
-                    yellow: 'bg-yellow-100 text-yellow-800',
-                    red: 'bg-red-100 text-red-800 animate-pulse', // el rojo con pulso suave
-                  }
->>>>>>> ed93feb (arreglo de pages WorkOrderDetailPage.tsx y de WorkOrderDetailPage)
                   return (
                     <tr
                       key={order.id}
                       onClick={() => navigate(`/app/work-orders/${order.id}`)}
-<<<<<<< HEAD
                       className={`hover:opacity-80 cursor-pointer transition-colors ${ALERT_ROW_COLORS[alert]}`}
                     >
                       <td className="px-3 py-3">
@@ -474,33 +412,6 @@ export function WorkOrdersPage() {
                         {getElapsedLabel(order.received_at)}
                       </td>
                     </tr>
-=======
-                      className="hover:bg-blue-50 cursor-pointer transition-colors"
-                    >
-                      <td className="px-6 py-3 font-mono text-blue-600 font-medium">{order.order_number}</td>
-                      <td className="px-6 py-3">
-                        <Badge className={`${STATUS_COLORS[order.status]} border-0 font-medium`}>
-                          {STATUS_LABELS[order.status]}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-3 text-gray-600 capitalize">{order.priority}</td>
-                      <td className="px-6 py-3 text-gray-500">
-                        {new Date(order.received_at).toLocaleDateString('es-AR', {
-                          day: '2-digit', month: '2-digit', year: 'numeric',
-                        })}
-                      </td>
-                      <td className="px-6 py-3">
-                        <Badge className={`${alertColors[alert]} border-0 font-medium`}>
-                          {alert === 'green' ? '✅ Normal' : alert === 'yellow' ? '⚠️ Próximo vencimiento' : '🔴 Vencido'}
-                        </Badge>
-                      </td>
-                      <td className="px-6 py-3 text-gray-600">
-                        {order.final_cost != null
-                          ? `$${order.final_cost.toLocaleString('es-AR')}`
-                          : '—'}
-                       </td>
-                     </tr>
->>>>>>> ed93feb (arreglo de pages WorkOrderDetailPage.tsx y de WorkOrderDetailPage)
                   )
                 })}
               </tbody>
@@ -509,22 +420,14 @@ export function WorkOrdersPage() {
         )}
       </div>
 
-<<<<<<< HEAD
       {/* Dialog nueva orden */}
-=======
-      {/* Dialog de nueva orden (sin cambios) */}
->>>>>>> ed93feb (arreglo de pages WorkOrderDetailPage.tsx y de WorkOrderDetailPage)
       <Dialog open={dialogOpen} onOpenChange={(o) => { setDialogOpen(o); if (!o) reset() }}>
         <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Nueva orden de trabajo</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 py-2">
-<<<<<<< HEAD
             {/* CLIENTE */}
-=======
-            {/* — CLIENTE — */}
->>>>>>> ed93feb (arreglo de pages WorkOrderDetailPage.tsx y de WorkOrderDetailPage)
             <div className="space-y-3">
               <p className="text-sm font-semibold text-gray-700 border-b pb-1">Cliente</p>
               <div className="flex gap-2">
