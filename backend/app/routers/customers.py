@@ -77,3 +77,33 @@ async def get_customer(
     if not customer:
         raise HTTPException(status_code=404, detail="Customer not found")
     return customer
+
+@router.get("/{customer_id}/orders")
+async def get_customer_orders(
+    customer_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from app.models.work_order import WorkOrder
+    from app.models.device import Device
+    result = await db.execute(
+        select(WorkOrder).where(WorkOrder.customer_id == customer_id)
+        .order_by(WorkOrder.created_at.desc())
+    )
+    orders = result.scalars().all()
+    enriched = []
+    for order in orders:
+        device_result = await db.execute(select(Device).where(Device.id == order.device_id))
+        device = device_result.scalar_one_or_none()
+        enriched.append({
+            "id": str(order.id),
+            "order_number": order.order_number,
+            "status": order.status,
+            "priority": order.priority,
+            "problem_description": order.problem_description,
+            "received_at": order.received_at.isoformat(),
+            "device_brand": device.brand if device else None,
+            "device_model": device.model if device else None,
+            "device_type": device.device_type if device else None,
+        })
+    return enriched

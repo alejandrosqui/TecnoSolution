@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Plus, Loader2, Users } from 'lucide-react'
-import { useForm } from 'react-hook-form'
+import { useForm, } from 'react-hook-form'
+import { useNavigate } from 'react-router-dom'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Button } from '@/shared/components/ui/button'
@@ -29,6 +30,7 @@ type CustomerFormData = z.infer<typeof customerSchema>
 
 export function CustomersPage() {
   const queryClient = useQueryClient()
+  const navigate = useNavigate()
   const { activeCompanyId } = useAuthStore()
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
@@ -127,7 +129,7 @@ export function CustomersPage() {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {customers.map((c) => (
-                  <tr key={c.id} className="hover:bg-gray-50 transition-colors">
+                  <tr key={c.id} onClick={() => navigate(`/app/customers/${c.id}`)} className="hover:bg-blue-50 cursor-pointer transition-colors">
                     <td className="px-6 py-3 font-medium text-gray-900">{c.full_name}</td>
                     <td className="px-6 py-3 text-gray-500">{c.email || '—'}</td>
                     <td className="px-6 py-3 text-gray-500">{c.phone || '—'}</td>
