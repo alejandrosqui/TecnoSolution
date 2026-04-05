@@ -1,42 +1,46 @@
 import { Wrench } from "lucide-react";
-import { Button } from "@/shared/components/ui/button";
 
 const FooterSection = () => {
   return (
-    <footer id="contact" className="relative bg-hero py-16">
+    <footer className="bg-foreground text-background py-12">
       <div className="container mx-auto px-6">
-        {/* CTA */}
-        <div className="text-center mb-16">
-          <h2 className="font-heading text-3xl md:text-4xl font-bold text-primary-foreground mb-4">
-            Empezá a profesionalizar tu taller hoy
-          </h2>
-          <p className="text-primary-foreground/60 max-w-xl mx-auto mb-8">
-            Creá tu cuenta en 2 minutos. Sin tarjeta de crédito, sin compromisos. 10 órdenes gratis por mes para siempre.
-          </p>
-          <Button size="lg" className="bg-gradient-accent text-accent-foreground font-semibold text-base px-8 hover:opacity-90 transition-opacity">
-            Crear cuenta gratis
-          </Button>
-        </div>
-
-        {/* Footer links */}
-        <div className="border-t border-primary-foreground/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="bg-gradient-primary p-1.5 rounded-lg">
-              <Wrench className="w-4 h-4 text-primary-foreground" />
+        <div className="grid md:grid-cols-3 gap-8 mb-8">
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <div className="bg-primary p-2 rounded-lg">
+                <Wrench className="w-4 h-4 text-primary-foreground" />
+              </div>
+              <span className="font-heading text-lg font-bold">TecnoSolution</span>
             </div>
-            <span className="font-heading text-sm font-bold text-primary-foreground">TecnoSolution</span>
+            <p className="text-sm text-background/60 leading-relaxed">
+              Gestion profesional para talleres de servicio tecnico.
+            </p>
           </div>
-          <p className="text-xs text-primary-foreground/40">
-            © 2026 TecnoSolution. Todos los derechos reservados.
+          <div>
+            <h4 className="font-semibold text-sm mb-4 text-background/80 uppercase tracking-wide">Plataforma</h4>
+            <ul className="space-y-2 text-sm text-background/60">
+              <li><a href="#features" className="hover:text-background transition-colors">Funcionalidades</a></li>
+              <li><a href="#pricing" className="hover:text-background transition-colors">Planes y precios</a></li>
+              <li><a href="/registro" className="hover:text-background transition-colors">Crear cuenta gratis</a></li>
+              <li><a href="/login" className="hover:text-background transition-colors">Iniciar sesion</a></li>
+              <li><a href="/consulta" className="hover:text-background transition-colors">Consultar estado de equipo</a></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold text-sm mb-4 text-background/80 uppercase tracking-wide">Contacto</h4>
+            <ul className="space-y-2 text-sm text-background/60">
+              <li><a href="mailto:alejandrosqui080@gmail.com" className="hover:text-background transition-colors">alejandrosqui080@gmail.com</a></li>
+              <li className="text-background/40">Caleta Olivia, Santa Cruz, Argentina</li>
+            </ul>
+          </div>
+        </div>
+        <div className="border-t border-background/10 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <p className="text-xs text-background/40">
+            2026 TecnoSolution. Todos los derechos reservados.
           </p>
-          <a
-            href="https://patagoniasoftware.com.ar"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs text-primary-foreground/40 hover:text-primary-foreground/70 transition-colors"
-          >
-            Desarrollado por <span className="font-semibold text-primary-foreground/60">PatagoniaSoftware</span>
-          </a>
+          <p className="text-xs text-background/40">
+            Desarrollado por <a href="https://patagoniasoftware.com.ar" target="_blank" rel="noopener noreferrer" className="text-background/60 hover:text-background transition-colors font-medium">Patagonia Software</a>
+          </p>
         </div>
       </div>
     </footer>
