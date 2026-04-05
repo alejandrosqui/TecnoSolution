@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Wrench,
   Settings,
+  Shield,
 } from 'lucide-react'
 import { cn } from '@/shared/lib/utils'
 import { useAuthStore } from '@/app/store/authStore'
@@ -89,27 +90,45 @@ export function AppLayout() {
       {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
     </button>
   </div>
+   {/* Nav */}
 
-        {/* Nav */}
         <nav className="flex-1 py-4 space-y-1 overflow-y-auto">
-          {navItems.map(({ to, icon: Icon, label }) => (
-            <NavLink
-              key={to}
-              to={to}
-              className={({ isActive }) =>
-                cn(
-                  'flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg text-sm font-medium transition-colors',
-                  isActive
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-400 hover:bg-gray-800 hover:text-white'
-                )
-              }
-            >
-              <Icon className="w-5 h-5 flex-shrink-0" />
-              {!collapsed && <span>{label}</span>}
-            </NavLink>
-          ))}
-        </nav>
+  {navItems.map(({ to, icon: Icon, label }) => (
+    <NavLink
+      key={to}
+      to={to}
+      className={({ isActive }) =>
+        cn(
+          'flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg text-sm font-medium transition-colors',
+          isActive
+            ? 'bg-blue-600 text-white'
+            : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+        )
+      }
+    >
+      <Icon className="w-5 h-5 flex-shrink-0" />
+      {!collapsed && <span>{label}</span>}
+    </NavLink>
+  ))}
+  
+  {/* Enlace para Superadmin - se muestra SOLO si es superadmin */}
+  {user?.is_superadmin && (
+    <NavLink
+      to="/app/superadmin"
+      className={({ isActive }) =>
+        cn(
+          'flex items-center gap-3 px-4 py-2.5 mx-2 rounded-lg text-sm font-medium transition-colors',
+          isActive
+            ? 'bg-yellow-500 text-white'
+            : 'text-gray-400 hover:bg-gray-800 hover:text-white'
+        )
+      }
+    >
+      <Shield className="w-5 h-5 flex-shrink-0" />
+      {!collapsed && <span>Superadmin</span>}
+    </NavLink>
+  )}
+</nav>
 
         {/* User info + logout */}
         <div className="border-t border-gray-700 p-4">

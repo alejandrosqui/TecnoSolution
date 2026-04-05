@@ -15,6 +15,7 @@ import { PublicQueryPage } from '@/app/pages/PublicQueryPage'
 import { RegisterPage } from '@/app/pages/RegisterPage'
 import { SettingsPage } from '@/app/pages/SettingsPage'
 import { CustomerDetailPage } from '@/app/pages/CustomerDetailPage'
+import { SuperAdminPage } from '@/app/pages/SuperAdminPage'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -25,7 +26,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<LandingPage />} />
+	  <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registro" element={<RegisterPage />} />
           <Route path="/consulta" element={<PublicQueryPage />} />
@@ -39,7 +40,8 @@ function App() {
           >
             <Route index element={<Navigate to="/app/dashboard" replace />} />
             <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="work-orders" element={<WorkOrdersPage />} />
+	    <Route path="superadmin" element={<SuperAdminPage />} />          
+	    <Route path="work-orders" element={<WorkOrdersPage />} />
             <Route path="work-orders/:id" element={<WorkOrderDetailPage />} />
 	    <Route path="customers" element={<CustomersPage />} />
             <Route path="customers/:id" element={<CustomerDetailPage />} />
