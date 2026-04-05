@@ -7,14 +7,16 @@ const plans = [
   {
     name: "Gratis",
     price: "0",
-    description: "Ideal para empezar y probar la plataforma.",
+    description: "Para probar la plataforma sin compromisos.",
     features: [
       "1 local",
       "1 usuario",
       "10 órdenes/mes",
-      "Comprobantes PDF",
-      "Firma digital",
-      "Dashboard básico",
+      "Ticket imprimible con QR",
+      "Registro fotográfico",
+      "Notificaciones por email",
+      "Dashboard con alertas",
+      "Consulta pública de estado",
     ],
     cta: "Empezar gratis",
     popular: false,
@@ -22,15 +24,16 @@ const plans = [
   {
     name: "Profesional",
     price: "36.800",
-    description: "Para talleres en crecimiento que necesitan más.",
+    description: "Para talleres que quieren crecer sin límites.",
     features: [
       "Hasta 3 locales",
       "5 usuarios incluidos",
       "Órdenes ilimitadas",
-      "Notificaciones WhatsApp",
+      "Todo lo del plan Gratis",
+      "Branding personalizado",
+      "Políticas y tiempos configurables",
       "Stock de repuestos",
       "Garantías automatizadas",
-      "Dashboard avanzado",
       "Soporte prioritario",
     ],
     cta: "Elegir Profesional",
@@ -38,17 +41,17 @@ const plans = [
   },
   {
     name: "Empresa",
-    price: "89.400",
+    price: "A consultar",
     description: "Para cadenas y talleres con múltiples sucursales.",
     features: [
       "Locales ilimitados",
       "Usuarios ilimitados",
-      "Órdenes ilimitadas",
-      "IA conversacional 24hs",
-      "WhatsApp Business API",
+      "Todo lo del plan Profesional",
+      "Usuarios con roles (admin/técnico)",
       "Dashboard multilocal",
-      "API completa",
+      "Integraciones a medida",
       "Onboarding dedicado",
+      "SLA garantizado",
     ],
     cta: "Contactar ventas",
     popular: false,
@@ -99,8 +102,14 @@ const PricingSection = () => {
                 <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>
               </div>
               <div className="mb-6">
-                <span className="font-heading text-4xl font-bold text-card-foreground">${plan.price}</span>
-                <span className="text-muted-foreground text-sm">{plan.price === "0" ? "" : "/mes por local"}</span>
+                {plan.price === "A consultar" ? (
+                  <span className="font-heading text-2xl font-bold text-card-foreground">A consultar</span>
+                ) : (
+                  <>
+                    <span className="font-heading text-4xl font-bold text-card-foreground">${plan.price}</span>
+                    <span className="text-muted-foreground text-sm">{plan.price === "0" ? "" : "/mes por local"}</span>
+                  </>
+                )}
               </div>
               <ul className="space-y-3 mb-8">
                 {plan.features.map((feature) => (
@@ -117,7 +126,11 @@ const PricingSection = () => {
                     : ""
                 }`}
                 variant={plan.popular ? "default" : "outline"}
-                onClick={() => plan.name === "Empresa" ? window.location.href = "mailto:alejandrosqui080@gmail.com?subject=Consulta%20Plan%20Empresa%20-%20TecnoSolution" : navigate('/registro')}
+                onClick={() =>
+                  plan.name === "Empresa"
+                    ? window.location.href = "mailto:alejandrosqui080@gmail.com?subject=Consulta%20Plan%20Empresa%20-%20TecnoSolution"
+                    : navigate('/registro')
+                }
               >
                 {plan.cta}
               </Button>

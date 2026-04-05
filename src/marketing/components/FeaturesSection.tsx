@@ -4,52 +4,52 @@ import {
   Bell,
   BarChart3,
   Camera,
-  PenTool,
-  MessageSquare,
+  QrCode,
   Shield,
   Package,
+  Settings,
 } from "lucide-react";
 
 const features = [
   {
     icon: ClipboardList,
     title: "Órdenes de trabajo completas",
-    description: "Recepción con datos del cliente, dispositivo, fotos de ingreso, firma digital y comprobante PDF automático.",
-  },
-{
-  icon: MessageSquare,
-  title: "Consulta de estado online",
-  description: "El cliente escanea el QR del ticket y ve el estado de su reparación en tiempo real, sin llamadas.",
-},
-  {
-    icon: BarChart3,
-    title: "Dashboard inteligente",
-    description: "Métricas de órdenes activas, tiempos de reparación, ingresos y órdenes vencidas por local.",
+    description: "Recepción con datos del cliente, dispositivo, problema reportado, prioridad y ticket imprimible al instante.",
   },
   {
     icon: Camera,
     title: "Registro fotográfico",
-    description: "Hasta 6 fotos al ingreso y 4 a la entrega. Evidencia visual almacenada en la nube.",
+    description: "Hasta 5 fotos al ingreso del equipo. Evidencia visual almacenada en la nube, accesible desde cualquier dispositivo.",
   },
   {
-    icon: PenTool,
-    title: "Firma digital",
-    description: "Firma del cliente en recepción y entrega. Comprobante con validez legal.",
+    icon: QrCode,
+    title: "QR de seguimiento para el cliente",
+    description: "Cada ticket incluye un QR único. El cliente escanea y ve el estado de su reparación en tiempo real, sin llamadas.",
   },
   {
-    icon: MessageSquare,
-    title: "IA conversacional 24hs",
-    description: "Bot de WhatsApp que responde estado de órdenes, preguntas frecuentes y escala a humano.",
+    icon: Bell,
+    title: "Notificaciones automáticas por email",
+    description: "Tu cliente recibe un email automático cada vez que cambia el estado de su equipo. Sin esfuerzo extra.",
+  },
+  {
+    icon: BarChart3,
+    title: "Dashboard con alertas de envejecimiento",
+    description: "Visualizá todas las órdenes activas con indicadores de color según su antigüedad. Verde, amarillo y rojo para priorizar.",
+  },
+  {
+    icon: Settings,
+    title: "Configuración por empresa",
+    description: "Logo, eslogan, colores, políticas y tiempos de alerta personalizados para cada taller. Tu marca, tu sistema.",
   },
   {
     icon: Shield,
-    title: "Garantías automatizadas",
-    description: "Registro de garantía con fecha de vencimiento, condiciones y alerta si el cliente vuelve en período.",
+    title: "Garantías",
+    description: "Registro de garantías por orden con fechas y condiciones. Control total del período post-reparación.",
   },
   {
     icon: Package,
     title: "Stock de repuestos",
-    description: "Gestión de inventario básico con costos, asociación a órdenes y control de existencias.",
+    description: "Gestión básica de inventario para asociar repuestos a órdenes y controlar existencias.",
   },
 ];
 
@@ -75,13 +75,12 @@ const FeaturesSection = () => {
         >
           <span className="text-sm font-medium text-secondary uppercase tracking-wider">Funcionalidades</span>
           <h2 className="font-heading text-3xl md:text-4xl font-bold text-foreground mt-3 mb-4">
-            Todo lo que tu taller necesita
+            Todo lo que tu taller necesita hoy
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto">
             Desde la recepción del equipo hasta la entrega final. Cada paso documentado, automatizado y trazable.
           </p>
         </motion.div>
-
         <motion.div
           variants={container}
           initial="hidden"
@@ -102,6 +101,18 @@ const FeaturesSection = () => {
               <p className="text-sm text-muted-foreground leading-relaxed">{feature.description}</p>
             </motion.div>
           ))}
+        </motion.div>
+
+        {/* Próximamente */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-16 text-center"
+        >
+          <p className="text-sm text-muted-foreground">
+            <span className="font-semibold text-foreground">Próximamente:</span> WhatsApp Business, firma digital, IA conversacional 24hs, app mobile y más.
+          </p>
         </motion.div>
       </div>
     </section>
