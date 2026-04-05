@@ -1,3 +1,10 @@
+import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { Input } from '@/shared/components/ui/input'
+import { Label } from '@/shared/components/ui/label'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/shared/components/ui/dialog'
+import { Pencil, Trash2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { ArrowLeft, Loader2, User, Phone, Mail, MapPin } from 'lucide-react'
@@ -11,7 +18,15 @@ import { WorkOrderStatus } from '@/app/services/workOrderService'
 export function CustomerDetailPage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
+  // Estados para modales
+  const [editOpen, setEditOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [editForm, setEditForm] = useState({ full_name: '', email: '', phone: '', address: '' })
+
+  // Query: Obtener datos del cliente
   const { data: customer, isLoading: customerLoading } = useQuery({
     queryKey: ['customer', id],
     queryFn: async () => {
@@ -21,6 +36,7 @@ export function CustomerDetailPage() {
     enabled: !!id,
   })
 
+  // Query: Obtener órdenes del cliente
   const { data: orders = [], isLoading: ordersLoading } = useQuery({
     queryKey: ['customer-orders', id],
     queryFn: async () => {
@@ -40,6 +56,48 @@ export function CustomerDetailPage() {
     enabled: !!id,
   })
 
+  // Abrir modal de edición con datos actuales
+  const handleEditOpen = () => {
+    setEditForm({
+      full_name: customer.full_name || '',
+      email: customer.email || '',
+      phone: customer.phone || '',
+      address: customer.address || '',
+    })
+    setEditOpen(true)
+  }
+
+  // Guardar cambios del cliente
+  const handleSave = async () => {
+    setIsSaving(true)
+    try {
+      await api.patch(`/api/customers/${id}`, {
+        company_id: customer.company_id,
+        ...editForm,
+      })
+      await queryClient.invalidateQueries({ queryKey: ['customer', id] })
+      await queryClient.invalidateQueries({ queryKey: ['customers'] })
+      toast.success('Cliente actualizado')
+      setEditOpen(false)
+    } catch {
+      toast.error('Error al actualizar')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  // Eliminar cliente
+  const handleDelete = async () => {
+    try {
+      await api.delete(`/api/customers/${id}`)
+      await queryClient.invalidateQueries({ queryKey: ['customers'] })
+      toast.success('Cliente eliminado')
+      navigate('/app/customers')
+    } catch {
+      toast.error('Error al eliminar')
+    }
+  }
+
   if (customerLoading) return (
     <div className="flex items-center justify-center h-64">
       <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
@@ -52,19 +110,38 @@ export function CustomerDetailPage() {
 
   return (
     <div className="p-6 space-y-6">
-      {/* Header */}
+      {/* Header con botones de editar/eliminar */}
       <div className="flex items-start gap-4">
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mt-0.5">
           <ArrowLeft className="w-4 h-4 mr-1" />
           Volver
         </Button>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-gray-900">{customer.full_name}</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Cliente desde {new Date(customer.created_at).toLocaleDateString('es-AR', {
-              day: '2-digit', month: 'long', year: 'numeric'
-            })}
-          </p>
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <h1 className="text-2xl font-bold text-gray-900">{customer.full_name}</h1>
+              <p className="text-sm text-gray-500 mt-1">
+                Cliente desde {new Date(customer.created_at).toLocaleDateString('es-AR', {
+                  day: '2-digit', month: 'long', year: 'numeric'
+                })}
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={handleEditOpen} className="gap-2">
+                <Pencil className="w-4 h-4" />
+                Editar
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => setDeleteOpen(true)} 
+                className="gap-2 text-red-600 hover:text-red-700 border-red-200"
+              >
+                <Trash2 className="w-4 h-4" />
+                Eliminar
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -159,6 +236,72 @@ export function CustomerDetailPage() {
           </Card>
         </div>
       </div>
+
+      {/* ============================================ */}
+      {/* MODAL EDITAR CLIENTE */}
+      {/* ============================================ */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Editar cliente</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label>Nombre completo</Label>
+              <Input 
+                value={editForm.full_name} 
+                onChange={e => setEditForm(f => ({...f, full_name: e.target.value}))} 
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Email</Label>
+              <Input 
+                value={editForm.email} 
+                onChange={e => setEditForm(f => ({...f, email: e.target.value}))} 
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Teléfono</Label>
+              <Input 
+                value={editForm.phone} 
+                onChange={e => setEditForm(f => ({...f, phone: e.target.value}))} 
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label>Dirección</Label>
+              <Input 
+                value={editForm.address} 
+                onChange={e => setEditForm(f => ({...f, address: e.target.value}))} 
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditOpen(false)}>Cancelar</Button>
+            <Button onClick={handleSave} disabled={isSaving}>
+              {isSaving && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              Guardar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* ============================================ */}
+      {/* MODAL CONFIRMAR ELIMINACIÓN */}
+      {/* ============================================ */}
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Eliminar cliente</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-gray-600 py-2">
+            ¿Estás seguro que querés eliminar a <strong>{customer.full_name}</strong>? Esta acción no se puede deshacer.
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleteOpen(false)}>Cancelar</Button>
+            <Button variant="destructive" onClick={handleDelete}>Eliminar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

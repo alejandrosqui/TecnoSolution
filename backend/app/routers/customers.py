@@ -107,3 +107,35 @@ async def get_customer_orders(
             "device_type": device.device_type if device else None,
         })
     return enriched
+@router.patch("/{customer_id}", response_model=CustomerOut)
+async def update_customer(
+    customer_id: UUID,
+    data: CustomerCreate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(Customer).where(Customer.id == customer_id))
+    customer = result.scalar_one_or_none()
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    if data.full_name: customer.full_name = data.full_name
+    if data.email is not None: customer.email = data.email
+    if data.phone is not None: customer.phone = data.phone
+    if data.address is not None: customer.address = data.address
+    await db.commit()
+    await db.refresh(customer)
+    return customer
+
+@router.delete("/{customer_id}")
+async def delete_customer(
+    customer_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    result = await db.execute(select(Customer).where(Customer.id == customer_id))
+    customer = result.scalar_one_or_none()
+    if not customer:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    await db.delete(customer)
+    await db.commit()
+    return {"ok": True}
