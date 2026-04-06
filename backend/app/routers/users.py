@@ -78,3 +78,64 @@ async def update_user_role(
     access.role = data.role
     await db.commit()
     return {"status": "updated", "role": data.role}
+
+class BranchAccessCreate(BaseModel):
+    branch_id: UUID
+    role: str
+
+@router.post("/{user_id}/branch-access")
+async def assign_branch_access(
+    user_id: UUID,
+    data: BranchAccessCreate,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    existing = await db.execute(
+        select(UserBranchAccess).where(
+            UserBranchAccess.user_id == user_id,
+            UserBranchAccess.branch_id == data.branch_id,
+        )
+    )
+    access = existing.scalar_one_or_none()
+    if access:
+        access.role = data.role
+        access.is_active = True
+    else:
+        access = UserBranchAccess(
+            user_id=user_id,
+            branch_id=data.branch_id,
+            role=data.role,
+        )
+        db.add(access)
+    await db.commit()
+    return {"status": "ok", "role": data.role}
+
+@router.get("/with-roles", response_model=List[dict])
+async def list_users_with_roles(
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from sqlalchemy.orm import selectinload
+    result = await db.execute(
+        select(User).options(selectinload(User.branch_access))
+    )
+    users = result.scalars().all()
+    out = []
+    for u in users:
+        out.append({
+            "id": str(u.id),
+            "email": u.email,
+            "full_name": u.full_name,
+            "phone": u.phone,
+            "is_active": u.is_active,
+            "is_superadmin": u.is_superadmin,
+            "branch_access": [
+                {
+                    "branch_id": str(a.branch_id),
+                    "role": a.role,
+                    "is_active": a.is_active,
+                }
+                for a in u.branch_access
+            ],
+        })
+    return out
