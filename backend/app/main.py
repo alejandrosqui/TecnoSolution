@@ -3,6 +3,7 @@
 
 from fastapi import FastAPI
 from app.routers import admin
+from app.routers import device_documents
 from app.core.config import settings
 from app.routers import auth, companies, users, customers, work_orders, quotes, products, plans, public, devices, storage
 
@@ -17,6 +18,7 @@ app = FastAPI(
 # Mount routers
 app.include_router(admin.router, prefix="/api/admin")
 app.include_router(auth.router, prefix="/api/auth", tags=["Auth"])
+app.include_router(device_documents.router, prefix="/api/device-documents")
 app.include_router(companies.router, prefix="/api/companies", tags=["Companies"])
 app.include_router(users.router, prefix="/api/users", tags=["Users"])
 app.include_router(customers.router, prefix="/api/customers", tags=["Customers"])

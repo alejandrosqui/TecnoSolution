@@ -1,3 +1,4 @@
+import { DeviceDocuments } from '@/app/components/DeviceDocuments'
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -406,6 +407,9 @@ const { data: companySettings } = useQuery({
       )}
     </CardContent>
   </Card>
+{device && (
+  <DeviceDocuments brand={device.brand} model={device.model} />
+)}
 {showPrintTicket && (
   <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
     <PrintTicket
