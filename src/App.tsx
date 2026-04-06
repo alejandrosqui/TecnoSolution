@@ -17,6 +17,7 @@ import { RegisterPage } from '@/app/pages/RegisterPage'
 import { SettingsPage } from '@/app/pages/SettingsPage'
 import { CustomerDetailPage } from '@/app/pages/CustomerDetailPage'
 import { SuperAdminPage } from '@/app/pages/SuperAdminPage'
+import { UsersPage } from '@/app/pages/UsersPage'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -46,6 +47,7 @@ function App() {
 	    <Route path="documents" element={<DocumentsLibraryPage />} />
             <Route path="work-orders/:id" element={<WorkOrderDetailPage />} />
 	    <Route path="customers" element={<CustomersPage />} />
+	    <Route path="users" element={<UsersPage />} />
             <Route path="customers/:id" element={<CustomerDetailPage />} />
             <Route path="stock" element={<StockPage />} />
             <Route path="warranties" element={<WarrantiesPage />} />

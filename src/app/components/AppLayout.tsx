@@ -24,6 +24,7 @@ const navItems = [
   { to: '/app/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/app/work-orders', icon: ClipboardList, label: 'Órdenes' },
   { to: '/app/customers', icon: Users, label: 'Clientes' },
+  { to: '/app/users', icon: Users, label: 'Usuarios' },
   { to: '/app/stock', icon: Package, label: 'Stock' },
   { to: '/app/warranties', icon: Shield, label: 'Garantías' },
   { to: '/app/settings', icon: Settings, label: 'Configuración' },
