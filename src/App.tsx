@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from '@/shared/components/ui/sonner'
 import LandingPage from '@/marketing/pages/LandingPage'
 import { ProtectedRoute } from '@/app/components/ProtectedRoute'
+import { DocumentsLibraryPage } from '@/app/pages/DocumentsLibraryPage'
 import { AppLayout } from '@/app/components/AppLayout'
 import { LoginPage } from '@/app/pages/LoginPage'
 import { DashboardPage } from '@/app/pages/DashboardPage'
@@ -42,6 +43,7 @@ function App() {
             <Route path="dashboard" element={<DashboardPage />} />
 	    <Route path="superadmin" element={<SuperAdminPage />} />          
 	    <Route path="work-orders" element={<WorkOrdersPage />} />
+	    <Route path="documents" element={<DocumentsLibraryPage />} />
             <Route path="work-orders/:id" element={<WorkOrderDetailPage />} />
 	    <Route path="customers" element={<CustomersPage />} />
             <Route path="customers/:id" element={<CustomerDetailPage />} />

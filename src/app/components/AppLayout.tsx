@@ -7,6 +7,7 @@ import {
   Package,
   Shield,
   LogOut,
+  BookOpen,
   ChevronLeft,
   ChevronRight,
   Wrench,
@@ -26,6 +27,7 @@ const navItems = [
   { to: '/app/stock', icon: Package, label: 'Stock' },
   { to: '/app/warranties', icon: Shield, label: 'Garantías' },
   { to: '/app/settings', icon: Settings, label: 'Configuración' },
+  { to: '/app/documents', icon: BookOpen, label: 'Documentación' },
 ]
 export function AppLayout() {
   const [collapsed, setCollapsed] = useState(false)

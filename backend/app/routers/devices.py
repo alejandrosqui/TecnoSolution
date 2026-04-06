@@ -39,3 +39,17 @@ async def list_customer_devices(
         .order_by(Device.created_at.desc())
     )
     return result.scalars().all()
+
+
+@router.get("/{device_id}", response_model=DeviceOut)
+async def get_device(
+    device_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from fastapi import HTTPException
+    result = await db.execute(select(Device).where(Device.id == device_id))
+    device = result.scalar_one_or_none()
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found")
+    return device
