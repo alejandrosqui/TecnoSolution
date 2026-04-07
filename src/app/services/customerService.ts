@@ -10,7 +10,7 @@ export interface CustomerCreate {
 
 export const customerService = {
   list: async (search?: string) => {
-    const { data } = await api.get<Customer[]>('/api/customers', { params: search ? { search } : undefined })
+    const { data } = await api.get<Customer[]>('/api/customers/', { params: search ? { search } : undefined })
     return data
   },
   get: async (id: string) => {
@@ -18,7 +18,7 @@ export const customerService = {
     return data
   },
   create: async (payload: CustomerCreate) => {
-    const { data } = await api.post<Customer>('/api/customers', payload)
+    const { data } = await api.post<Customer>('/api/customers/', payload)
     return data
   },
 }
