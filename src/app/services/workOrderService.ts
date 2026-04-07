@@ -16,7 +16,7 @@ export interface WorkOrderCreate {
 
 export const workOrderService = {
   list: async (params?: { branch_id?: string; status?: string }) => {
-    const { data } = await api.get<WorkOrder[]>('/api/work-orders', { params })
+    const { data } = await api.get<WorkOrder[]>('/api/work-orders/', { params })
     return data
   },
   get: async (id: string) => {
@@ -24,7 +24,7 @@ export const workOrderService = {
     return data
   },
   create: async (payload: WorkOrderCreate) => {
-    const { data } = await api.post<WorkOrder>('/api/work-orders', payload)
+    const { data } = await api.post<WorkOrder>('/api/work-orders/', payload)
     return data
   },
   updateStatus: async (id: string, payload: { status: WorkOrderStatus; comment?: string }) => {

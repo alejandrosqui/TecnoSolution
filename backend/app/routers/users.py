@@ -116,10 +116,52 @@ async def list_users_with_roles(
     db: AsyncSession = Depends(get_db),
 ):
     from sqlalchemy.orm import selectinload
-    result = await db.execute(
-        select(User).options(selectinload(User.branch_access))
-    )
-    users = result.scalars().all()
+    from app.models.company import Branch
+
+    # Obtener company_id del usuario actual
+    if current_user.is_superadmin:
+        # Superadmin ve todos
+        result = await db.execute(
+            select(User).options(selectinload(User.branch_access))
+        )
+        users = result.scalars().all()
+    else:
+        # Obtener las branches de la empresa del usuario
+        branch_result = await db.execute(
+            select(UserBranchAccess.branch_id)
+            .where(UserBranchAccess.user_id == current_user.id)
+        )
+        my_branch_ids = [r[0] for r in branch_result.fetchall()]
+
+        if not my_branch_ids:
+            return []
+
+        # Obtener company_id de esas branches
+        company_result = await db.execute(
+            select(Branch.company_id)
+            .where(Branch.id.in_(my_branch_ids))
+            .limit(1)
+        )
+        company_id = company_result.scalar_one_or_none()
+        if not company_id:
+            return []
+
+        # Obtener todas las branches de esa empresa
+        all_branches_result = await db.execute(
+            select(Branch.id).where(Branch.company_id == company_id)
+        )
+        all_branch_ids = [r[0] for r in all_branches_result.fetchall()]
+
+        # Obtener usuarios que tienen acceso a esas branches
+        user_result = await db.execute(
+            select(User)
+            .join(UserBranchAccess, UserBranchAccess.user_id == User.id)
+            .where(UserBranchAccess.branch_id.in_(all_branch_ids))
+            .options(selectinload(User.branch_access))
+            .distinct()
+        )
+        users = user_result.scalars().all()
+
     out = []
     for u in users:
         out.append({
