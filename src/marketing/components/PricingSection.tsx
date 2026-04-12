@@ -3,7 +3,18 @@ import { Check } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/shared/components/ui/button";
 
-const plans = [
+interface Plan {
+  name: string
+  price: string
+  promo?: string
+  promoLabel?: string
+  description: string
+  features: string[]
+  cta: string
+  popular: boolean
+}
+
+const plans: Plan[] = [
   {
     name: "Gratis",
     price: "0",
@@ -24,6 +35,8 @@ const plans = [
   {
     name: "Profesional",
     price: "36.800",
+    promo: "25.600",
+    promoLabel: "🔥 Oferta abril — 1 año completo",
     description: "Para talleres que quieren crecer sin límites.",
     features: [
       "Hasta 3 locales",
@@ -36,7 +49,7 @@ const plans = [
       "Garantías automatizadas",
       "Soporte prioritario",
     ],
-    cta: "Elegir Profesional",
+    cta: "Aprovechar oferta",
     popular: true,
   },
   {
@@ -104,10 +117,21 @@ const PricingSection = () => {
               <div className="mb-6">
                 {plan.price === "A consultar" ? (
                   <span className="font-heading text-2xl font-bold text-card-foreground">A consultar</span>
+                ) : plan.promo ? (
+                  <div>
+                    <div className="inline-block bg-secondary/20 text-secondary text-xs font-semibold px-3 py-1 rounded-full mb-2">
+                      {plan.promoLabel}
+                    </div>
+                    <div className="flex items-end gap-2">
+                      <span className="font-heading text-4xl font-bold text-card-foreground">${plan.promo}</span>
+                      <span className="text-muted-foreground text-sm mb-1">precio final por mes</span>
+                    </div>
+                    <div className="text-muted-foreground text-xs line-through mt-1">${plan.price}/mes por local</div>
+                  </div>
                 ) : (
                   <>
                     <span className="font-heading text-4xl font-bold text-card-foreground">${plan.price}</span>
-                    <span className="text-muted-foreground text-sm">{plan.price === "0" ? "" : "/mes por local"}</span>
+                    <span className="text-muted-foreground text-sm">/mes por local</span>
                   </>
                 )}
               </div>

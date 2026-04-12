@@ -63,16 +63,31 @@ const HeroSection = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-primary-foreground/20 bg-primary-foreground/5 mb-6">
-              <span className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
-              <span className="text-sm text-primary-foreground/80">Plataforma #1 para talleres técnicos</span>
-            </div>
+           
+	      <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex flex-col sm:flex-row items-center gap-3 px-5 py-3 rounded-2xl bg-gradient-to-r from-orange-500/20 to-yellow-400/20 border border-orange-400/40 mb-6 w-full sm:w-auto"
+            >
+              <span className="text-2xl">🔥</span>
+              <div className="text-center sm:text-left">
+                <span className="block text-orange-300 font-bold text-sm tracking-wide uppercase">Solo en abril 2026</span>
+                <span className="block text-primary-foreground font-semibold text-base">
+                  Plan Profesional por <span className="text-yellow-300 font-bold">$25.600/mes</span> — 1 año completo
+                </span>
+              </div>
+              <span className="hidden sm:block text-orange-300 text-xs border border-orange-400/40 px-2 py-1 rounded-full whitespace-nowrap animate-pulse">
+                Tiempo limitado
+              </span>
+            </motion.div>
+
             <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold text-primary-foreground leading-tight mb-6">
               Gestión integral para tu{" "}
               <span className="text-gradient-primary">taller de reparación</span>
             </h1>
             <p className="text-lg text-primary-foreground/70 max-w-lg mb-8 leading-relaxed">
-              Órdenes de trabajo, seguimiento en tiempo real, notificaciones automáticas y dashboard inteligente. Todo lo que necesitás para profesionalizar tu servicio técnico.
+              Órdenes de trabajo, seguimiento en tiempo real, notificaciones automáticas y dashboard inteligente. Directamente de nuestro taller... Al tuyo.
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button size="lg" onClick={() => navigate('/registro')} className="bg-gradient-accent text-accent-foreground font-semibold text-base px-8 hover:opacity-90 transition-opacity">

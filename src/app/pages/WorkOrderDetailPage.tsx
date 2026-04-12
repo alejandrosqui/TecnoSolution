@@ -1,4 +1,5 @@
 import { DeviceDocuments } from '@/app/components/DeviceDocuments'
+import { SignatureCanvas } from '@/app/components/SignatureCanvas'
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -407,6 +408,7 @@ const { data: companySettings } = useQuery({
       )}
     </CardContent>
   </Card>
+<SignatureCanvas workOrderId={id!} orderNumber={order.order_number} />
 {device && (
   <DeviceDocuments brand={device.brand} model={device.model} />
 )}

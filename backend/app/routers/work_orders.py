@@ -338,3 +338,86 @@ async def create_quote_for_order(
     await db.commit()
     await db.refresh(quote)
     return quote
+
+# ── FIRMA ELECTRÓNICA ────────────────────────────────────────────────────────
+
+class SignatureBody(BaseModel):
+    image_data: str
+    signer_name: str | None = None
+
+
+@router.post("/{order_id}/signature")
+async def save_signature(
+    order_id: UUID,
+    body: SignatureBody,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    import base64, io as _io
+    from datetime import timezone
+    from app.models.work_order import WorkOrderSignature
+    from app.core.minio_client import minio_client
+    from app.core.config import settings
+
+    result = await db.execute(select(WorkOrder).where(WorkOrder.id == order_id))
+    order = result.scalar_one_or_none()
+    if not order:
+        raise HTTPException(status_code=404, detail="Work order not found")
+
+    existing = await db.execute(
+        select(WorkOrderSignature).where(WorkOrderSignature.work_order_id == order_id)
+    )
+    existing_sig = existing.scalar_one_or_none()
+    if existing_sig:
+        await db.delete(existing_sig)
+        await db.flush()
+
+    img_data = body.image_data
+    if img_data.startswith("data:image"):
+        img_data = img_data.split(",", 1)[1]
+    img_bytes = base64.b64decode(img_data)
+
+    storage_key = f"signatures/{order_id}/{dt.datetime.utcnow().strftime('%Y%m%d%H%M%S')}.png"
+    minio_client.put_object(
+        settings.minio_bucket_photos,
+        storage_key,
+        _io.BytesIO(img_bytes),
+        length=len(img_bytes),
+        content_type="image/png",
+    )
+
+    sig = WorkOrderSignature(
+        work_order_id=order_id,
+        storage_key=storage_key,
+        signed_at=dt.datetime.now(timezone.utc),
+        signer_name=body.signer_name,
+    )
+    db.add(sig)
+    await db.commit()
+    return {"success": True, "storage_key": storage_key}
+
+
+@router.get("/{order_id}/signature")
+async def get_signature(
+    order_id: UUID,
+    current_user: User = Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
+):
+    from datetime import timedelta, timezone
+    from app.models.work_order import WorkOrderSignature
+    from app.core.minio_client import minio_client
+    from app.core.config import settings
+
+    result = await db.execute(
+        select(WorkOrderSignature).where(WorkOrderSignature.work_order_id == order_id)
+    )
+    sig = result.scalar_one_or_none()
+    if not sig:
+        raise HTTPException(status_code=404, detail="No signature found")
+
+    url = minio_client.presigned_get_object(
+        settings.minio_bucket_photos,
+        sig.storage_key,
+        expires=timedelta(hours=2),
+    )
+    return {"url": url, "signed_at": sig.signed_at, "signer_name": sig.signer_name}
