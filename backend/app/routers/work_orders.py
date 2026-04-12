@@ -259,6 +259,20 @@ async def update_work_order_status(
             )
     except Exception as e:
         print(f"EMAIL ERROR: {e}")
+
+    try:
+        from app.core.whatsapp import send_whatsapp_message, build_status_message
+        if customer and customer.phone:
+            msg = build_status_message(
+                customer_name=customer.full_name,
+                order_number=order.order_number,
+                status_display=status_display,
+                company_name=company.name if company else "TecnoSolution",
+                public_token=order.public_token,
+            )
+            await send_whatsapp_message(customer.phone, msg)
+    except Exception as e:
+        print(f"WHATSAPP ERROR: {e}")
     return {"status": "updated", "new_status": data.status}
 
 
