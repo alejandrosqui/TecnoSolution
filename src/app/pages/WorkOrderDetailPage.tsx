@@ -3,7 +3,7 @@ import { SignatureCanvas } from '@/app/components/SignatureCanvas'
 import { useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Loader2, RefreshCw, FileText, Plus, Trash2, Camera, Printer } from 'lucide-react'
+import { ArrowLeft, Loader2, RefreshCw, FileText, Plus, Trash2, Camera, Printer, Tag } from 'lucide-react'
 import { Button } from '@/shared/components/ui/button'
 import { Badge } from '@/shared/components/ui/badge'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/ui/card'
@@ -22,6 +22,7 @@ import { STATUS_LABELS, STATUS_COLORS } from './DashboardPage'
 import api from '@/app/services/api'
 import { toast } from 'sonner'
 import { PrintTicket } from '@/app/components/PrintTicket'
+import { StickerLabel } from '@/app/components/StickerLabel'
 
 const ALL_STATUSES: WorkOrderStatus[] = [
   'received', 'queued', 'diagnosing', 'waiting_customer_approval', 'quote_sent',
@@ -68,6 +69,7 @@ export function WorkOrderDetailPage() {
   const [photos, setPhotos] = useState<{id: string, filename: string, url: string}[]>([])
   const [isUploadingPhotos, setIsUploadingPhotos] = useState(false)
   const [showPrintTicket, setShowPrintTicket] = useState(false)
+  const [showSticker, setShowSticker] = useState(false)
 
   const { data: order, isLoading: orderLoading } = useQuery({
     queryKey: ['work-order', id],
@@ -251,6 +253,11 @@ const { data: companySettings } = useQuery({
            <Printer className="w-4 h-4" />
            Imprimir ticket
          </Button>
+         <Button variant="outline" onClick={() => { setShowSticker(true); setTimeout(() => window.print(), 300) }} className="gap-2">
+           <Tag className="w-4 h-4" />
+           Sticker QR
+           Imprimir ticket
+         </Button>
           <Button onClick={() => setStatusDialogOpen(true)} className="gap-2">
             <RefreshCw className="w-4 h-4" />
             Cambiar estado
@@ -411,6 +418,16 @@ const { data: companySettings } = useQuery({
 <SignatureCanvas workOrderId={id!} orderNumber={order.order_number} />
 {device && (
   <DeviceDocuments brand={device.brand} model={device.model} />
+)}
+{showSticker && (
+  <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
+    <StickerLabel
+      order={order}
+      device={device}
+      customer={customer}
+      companyName={companySettings?.name}
+    />
+  </div>
 )}
 {showPrintTicket && (
   <div style={{ position: 'absolute', left: '-9999px', top: 0 }}>
