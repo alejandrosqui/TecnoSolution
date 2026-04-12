@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { Wrench, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/shared/components/ui/button";
-import heroImage from "@/assets/hero-dashboard.jpg";
+import { FeatureShowcase } from "./FeatureShowcase";
 
 const HeroSection = () => {
   const navigate = useNavigate();
@@ -111,16 +111,7 @@ const HeroSection = () => {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="relative"
           >
-            <div className="relative rounded-2xl overflow-hidden shadow-elevated border border-primary-foreground/10">
-              <img
-                src={heroImage}
-                alt="Dashboard de TecnoSolution mostrando gestión de órdenes de trabajo"
-                width={1280}
-                height={800}
-                className="w-full h-auto"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-foreground/20 to-transparent" />
-            </div>
+          <FeatureShowcase />
             {/* Floating stat card */}
             <motion.div
               className="absolute -bottom-6 -left-6 glass rounded-xl p-4 shadow-elevated border border-border"
